@@ -422,7 +422,7 @@ function form() {
       <div class="fld" id="f-right_to_work"><div class="lbl">Right to work in Australia</div><div class="chips wide radio">${RTW.map(([v, l]) => chip("right_to_work", v, l, d.right_to_work === v)).join("")}</div></div>
       <div class="fld" id="f-start"><div class="lbl">When can you start?</div><div class="chips">${START.map(s => chip("start", s, s, d.start === s)).join("")}</div></div>
       ${field("instagram", 'Instagram handle <span class="lbln">(optional)</span>', "text", "@yourhandle", 'autocapitalize="off" autocorrect="off" maxlength="60"')}
-      <div class="hpf" aria-hidden="true"><label>Company website<input data-f="hp" tabindex="-1" autocomplete="off" value=""></label></div>
+      <div class="hpf" aria-hidden="true"><label>Leave this box empty<input data-f="hp" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore value=""></label></div>
     </div></section>`;
   const qs = S2.map((q, i) => exCard(q, `<div class="qn">${i + 1}<span>/${S2.length}</span></div>`)).join("");
   return `<main>
@@ -566,7 +566,7 @@ async function submit() {
     if (Array.isArray(v)) { if (v.length) answers[q.id] = v.slice(0, 12); } else { const t = (v || "").toString().trim(); if (t) answers[q.id] = t.slice(0, 1200); } });
   const sid = `${CFG.role}.${uid()}${IS_TEST ? ".test" : ""}`;
   const row = { submission_id: sid, role: CFG.role, question_set: CFG.question_set, details, answers, is_test: IS_TEST, source: "web" };
-  if (d.hp) { console.warn("honeypot filled; not sent"); F = blank(); save(); paintThanks(details.full_name); submitting = false; return; } // bots
+  if (d.hp) { details.honeypot = String(d.hp).slice(0, 200); row.source = "web-hp"; } // hidden field filled (bot, or a phone's autofill): still sent, flagged for the office, never dropped
   qSet([...qAll(), { sid, row, queuedAt: now.toISOString() }]);
   F = blank(); lsSet(`${KEY}:draft`, null); tried = false;
   waiting = { sid, name: details.full_name };
